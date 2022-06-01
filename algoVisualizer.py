@@ -1,4 +1,6 @@
 # import libraries 
+
+import math
 import pygame 
 import random 
 
@@ -14,15 +16,14 @@ class globalValues:
     colRed = 255, 0, 0
     background_Col = colWhite
     
-    gradient_Col = 
-    [ 
+    gradient_Col = [ 
         (128, 128, 128),
         (160, 160, 160),
         (192, 192, 192)
     ] 
 
-    side_pad = 100 
-    top_pad = 150
+    side_pad = 200 
+    top_pad = 250
 
     # define frame of the visualizer 
 
@@ -42,19 +43,24 @@ class globalValues:
         self.max_val = max(lst) 
     
         # assigning the total area of each bar
-        self.bar_width = round(self.width - self.side_pad / len(lst)) 
+        self.bar_width = round((self.width - self.side_pad) / len(lst)) 
         self.bar_height = round((self.height - self.top_pad) / (self.max_val - self.min_val))
-        self.x_start = self.side_pad // 2   
+        self.start_x = self.side_pad // 2   
 
 def draw(draw_info):
-    draw_info.window.fill(globalValues.background_Col) 
+    draw_info.window.fill(globalValues.background_Col)
+    draw_list(draw_info)
     pygame.display.update()
 
 def draw_list(draw_info):
     lst = draw_info.lst 
     for i, val in enumerate(lst): 
-         x = draw_info.start_x + i * draw_info.block_width 
-         y = draw_info.height - (val - draw_info.min_val) * draw_info.block_height 
+        x = draw_info.start_x + i * draw_info.bar_width
+        y = draw_info.height - (val - draw_info.min_val) * draw_info.bar_height
+
+        color = draw_info.gradient_Col[i % 3] # this will have a different element color 
+
+        pygame.draw.rect(draw_info.window, color, (x, y, draw_info.bar_width, draw_info.height))         
 
 # creating starting list function for our program 
 
@@ -86,7 +92,7 @@ def main():
     # for example, if you draw something on screen, program will draw and then immediately end
     # we do not want this, we want it to continously run UNTIL we end it manually  
      
-    draw_info = globalValues(800, 600, lst)
+    draw_info = globalValues(1000, 800, lst)
     while run:  
         #number of frames
         clock.tick(60) 
@@ -95,7 +101,14 @@ def main():
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                run = False 
+                run = False
+            
+            if event.type != pygame.KEYDOWN:
+                continue 
+            
+            if event.key == pygame.K_r:
+                lst = generate_start_list(n, min_val, max_val)
+                draw_info.set_list(lst) 
 
     # as soon run is False, the program will be stopped 
     pygame.quit()  
